@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Compress files
+*.zip
+
+# folder course
+prereq
+cp1
+cp2a
+cp2b
+cp2c
+cp3a
+cp4
