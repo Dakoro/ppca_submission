@@ -1,4 +1,15 @@
 #include <cuda_runtime.h>
+#include <iostream>
+
+static inline void check(cudaError_t err, const char* context) {
+    if (err != cudaSuccess) {
+        std::cerr << "CUDA error: " << context << ": "
+            << cudaGetErrorString(err) << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+}
+
+#define CHECK(x) check(x, #x)
 
 // Single kernel to compute all correlations
 __global__ void correlateKernel(int ny, int nx, const float* data, float* result) {
@@ -58,46 +69,29 @@ void correlate(int ny, int nx, const float* data, float* result) {
                  (ny + blockDim.y - 1) / blockDim.y);
                  
     // Allocate memory for input data
-    err = cudaMalloc((void**)&d_data, ny * nx * sizeof(float));
-    if (err != cudaSuccess) {
-        goto cleanup;
-    }
+    CHECK(cudaMalloc((void**)&d_data, ny * nx * sizeof(float)));
     
     // Allocate memory for result
-    err = cudaMalloc((void**)&d_result, ny * ny * sizeof(float));
-    if (err != cudaSuccess) {
-        goto cleanup;
-    }
+    CHECK(cudaMalloc((void**)&d_result, ny * ny * sizeof(float)));
     
     // Copy input data to device
-    err = cudaMemcpy(d_data, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice);
-    if (err != cudaSuccess) {
-        goto cleanup;
-    }
+    CHECK(cudaMemcpy(d_data, data, ny * nx * sizeof(float), cudaMemcpyHostToDevice));
     
     // Initialize result matrix with zeros to avoid uninitialized memory issues
-    err = cudaMemset(d_result, 0, ny * ny * sizeof(float));
-    if (err != cudaSuccess) {
-        goto cleanup;
-    }
-    
+    CHECK(cudaMemset(d_result, 0, ny * ny * sizeof(float)));
     
     // Launch kernel
     correlateKernel<<<gridDim, blockDim>>>(ny, nx, d_data, d_result);
     
     // Check for kernel errors
-    err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        goto cleanup;
-    }
+    CHECK(cudaGetLastError());
     
     // Synchronize to ensure kernel completion
     cudaDeviceSynchronize();
     
     // Copy result back to host
-    err = cudaMemcpy(result, d_result, ny * ny * sizeof(float), cudaMemcpyDeviceToHost);
-    
-cleanup:
+    CHECK(cudaMemcpy(result, d_result, ny * ny * sizeof(float), cudaMemcpyDeviceToHost));
+
     // Free device memory
     if (d_data) cudaFree(d_data);
     if (d_result) cudaFree(d_result);
