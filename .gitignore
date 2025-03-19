@@ -46,6 +46,8 @@ cp4
 cp5
 cp9a
 is2
+is4
+is6a
 mf1
 mf2
 mf9a
@@ -55,3 +57,10 @@ so6
 llm9a
 i8mm_cpu_bl
 i8mm_cpu_fast
+i8mm_cpu_vnni
+i8mm_gpu_bl
+i8mm_gpu_fast
+i8mm_gpu_dp4a
+i8mm_tc_bl
+cpu
+gpu
