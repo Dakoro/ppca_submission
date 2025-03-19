@@ -6,6 +6,7 @@
 #include <ctime>
 #include <cfloat>
 #include <random>
+#include <vector>
 #include "immintrin.h"
 
 typedef float float8_t __attribute__ ((vector_size (8 * sizeof(float))));
@@ -314,17 +315,13 @@ void step_v6(std::vector<float> r, std::vector<float> d_, int n) {
     }
 }
 
-int main() {
+void benchmark_step() {
     constexpr int n = 4000;
     std::vector<float> d(n*n);
     std::srand( ( unsigned int )std::time( nullptr ) );
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            std::random_device rd;  // Obtain a random number from hardware
-            std::mt19937 gen(rd()); // Use Mersenne Twister engine
-            std::uniform_real_distribution<> dis(0.0, 1.0); // Define the range
-            float random_float = dis(gen);
-            d[n*i + j] = random_float;
+            d[i + j * n] = static_cast<float>(rand()) / RAND_MAX;
         }
     }
 
@@ -334,7 +331,11 @@ int main() {
     step_v6(r, d, n);
     auto end = std::chrono::high_resolution_clock::now();
     auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << ms_int.count() << " ms";
+    std::cout << ms_int.count() << " ns";
+}
+
+int main() {
+    benchmark_step();
     // for (int i = 0; i < n; ++i) {
     //     for (int j = 0; j < n; ++j) {
     //         std::cout << r[i*n + j] << " ";

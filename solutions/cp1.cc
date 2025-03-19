@@ -7,6 +7,7 @@ This is the function you need to implement. Quick reference:
 - only parts with 0 <= j <= i < ny need to be filled
 */
 #include <cmath>
+
 void correlate(int ny, int nx, const float *data, float *result) {
     // Allocate memory for the normalized matrix X
     double* X = new double[ny * nx];
